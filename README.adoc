@@ -1,6 +1,6 @@
 = Intelligent LED library for Arduino =
 
-This library is designed to make the use of LEDs as simple as possible. After creating the LED and asigning a port number, the state simply can be changed to on, off, blink or flash. When constructed with two ports a multicolor LED can be used in the same way with the additional color method. A simple update() in the mail loop ensures the correct blink and flash timing.  
+This library is designed to make the use of LEDs as simple as possible. After creating the LED and asigning a port number, the state simply can be changed to on, off, blink or flash. When constructed with two ports a multicolor LED can be used in the same way with the additional color method. A simple update() in the main loop ensures the correct blink and flash timing.  
 
 For more information about this library please visit us at
 http://nibble-arts.org
