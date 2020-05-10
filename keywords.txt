@@ -1,0 +1,30 @@
+#######################################
+# Syntax Coloring Map For LED
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+blink   KEYWORD2
+flash   KEYWORD2
+invert   KEYWORD2
+on   KEYWORD2
+off   KEYWORD2
+color   KEYWORD2
+toggle   KEYWORD2
+update   KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+INTELLILED_RED  LITERAL1
+INTELLILED_GREEN  LITERAL1
+INTELLILED_YELLOW  LITERAL1
