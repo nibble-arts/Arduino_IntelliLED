@@ -207,9 +207,6 @@ void INTELLILED::_reset(void) {
  */
 void INTELLILED::_set_led(int color) {
 
-Serial.print("color: ");
-Serial.println(color);
-
 	switch(color) {
 		
         case INTELLILED_RED:
