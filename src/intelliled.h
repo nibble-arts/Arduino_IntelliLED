@@ -15,8 +15,15 @@
  * With set_blink a blink style can be added, updated with the blink() method.
  * 
  * blink(int): set the blink time in ms
- * flash_on(): the INTELLILED only flashes 10 ms in the speed set by time()
- * flass_off(): normal blinking mode
+ * flash(): the INTELLILED only flashes 10 ms in the speed set by time()
+ *
+ * on(): switch the led on
+ * off(): switch the led off
+ *
+ * color(COLOR): set a color when two ports are defined
+ * offColor(COLOR): set a color instead of off state
+ * 
+ * forceFlash(time): set a time to flash, even at on state
  */
 
 #ifndef INTELLILED_H
@@ -33,14 +40,15 @@ class INTELLILED {
     INTELLILED(void);
     INTELLILED(int port, int port1=false);
     void begin(int port, int port1=false);
-    void blink(int blink_time);
+    void setBlink(int);
     void forceBlink(int);
-    void flash(int blink_time);
+    void blink(int);
+    void flash(int);
     void on(void);
     void off(void);
-    void color(int color);
-    void color(int color, int color1);
-    void offColor(int color);
+    void color(int);
+    void color(int, int);
+    void offColor(int);
     void toggle(void);
     void update(void);
 
@@ -60,6 +68,7 @@ class INTELLILED {
     int _blink_time;
 
 	void _set_led(int);
+    void _clear_led(void);
     void _on(void);
     void _off(void);
     void _flash_on(void);

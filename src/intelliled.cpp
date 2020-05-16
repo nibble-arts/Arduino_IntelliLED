@@ -46,7 +46,59 @@ void INTELLILED::begin(int port, int port1) {
 
 
 /*
- * set blink time in ms
+ * update led: blink or flash
+ * is to be called in the main loop
+ */
+void INTELLILED::update(void) {
+
+  if (_force_blink) {
+    _blink_time = _force_blink;
+  }
+
+
+  // blink or flash
+  if (_blink_time != 0) {
+
+    // timed out
+    if (millis() > (_timeout + (int)_blink_time)) {
+
+      // flash
+      if (_flash_status == true) {
+        _on();
+        delay(10);
+        _off();
+      }
+
+      // blink
+      else {
+        toggle();
+      }
+
+      _timeout = millis();
+    }
+  }
+}
+
+
+/*
+ * toggle INTELLILED
+ */
+void INTELLILED::toggle(void) {
+
+  if (_is_on) {
+  
+    _off();
+    _is_on = false;
+  }
+
+  else {
+    _on();
+  }
+}
+
+
+/*
+ * set blink with time in ms
  */
 void INTELLILED::blink(int blink_time) {
 
@@ -56,10 +108,20 @@ void INTELLILED::blink(int blink_time) {
 
 
 /*
- * force blink even if in on mode
+ * set ony blink time in ms
  */
-void INTELLILED::forceBlink(int force_blink) {
-  _force_blink = force_blink;
+void INTELLILED::setBlink(int blink_time) {
+
+  _blink_time = blink_time;
+}
+
+
+/*
+ * force to blink, even if only on with time in ms
+ */
+void INTELLILED::forceBlink(int blink_time) {
+
+  _force_blink = blink_time;
 }
 
 
@@ -88,87 +150,10 @@ void INTELLILED::on(void) {
  * switch led off
  */
 void INTELLILED::off(void) {
-  _reset();
+
+    _reset();
 }
 
-
-/*
- * update led: blink or flash
- * is to be called in the main loop
- */
-void INTELLILED::update(void) {
-
-  // if (_blink_time != 0 || _force_blink != 0) {
-  if (_blink_time != 0) {
-
-
-    // timeout > change status
-    // if ((millis() > (_timeout + (int)_blink_time))
-      // || (_blink_time != 0 && (millis() > (_timeout + (int)_force_blink)))) {
-
-    if (millis() > (_timeout + (int)_blink_time)) {
-
-      // flash
-      if (_flash_status == true) {
-        _on();
-        delay(5);
-        _off();
-
-        // flash with second colour
-        if (_off_color) {
-        	delay (50);
-        	_set_led(_led_color1);
-	        delay (5);
-			    _off();
-        }
-      }
-
-      // blink
-      else {
-        toggle();
-      }
-
-      _timeout = millis();
-    }
-  }
-}
-
-
-/*
- * toggle INTELLILED
- */
-void INTELLILED::toggle(void) {
-
-  if (_is_on) {
-  
-  	// blink with second colour
-  	if (_off_color) {
-
-   		_set_led(_led_color1);
-
-      // off color == color => blink one time
-      if (_led_color == _led_color1) {
-
-        delay(10);
-        _off();
-        delay(50);
-        _set_led(_led_color1);
-      }
-
-  	}
-  	
-  	// switch off
-  	else {
-  	    _off();
-  	}
-
-    _is_on = false;
-  }
-
-  else {
-    _on();
-  }
-}
 
 
 /*
@@ -196,8 +181,11 @@ void INTELLILED::offColor(int color) {
  * reset blink time and switch off
  */
 void INTELLILED::_reset(void) {
-  blink(0);
-  _off_color = false;
+
+  if (!_force_blink) {
+    blink(0);
+  }
+
   _off();
 }
 
@@ -228,6 +216,19 @@ void INTELLILED::_set_led(int color) {
 
 
 /*
+ * switch leds off
+ */
+void INTELLILED::_clear_led() {
+
+  digitalWrite(_led_port, LOW);
+
+  if (_led_port1) {
+    digitalWrite(_led_port1, LOW);
+  }
+}
+
+
+/*
  * set led port[s] on
  */
 void INTELLILED::_on(void) {
@@ -251,10 +252,26 @@ void INTELLILED::_off(void) {
 
   _is_on = false;
 
-  digitalWrite(_led_port, LOW);
+  // has off color
+  if (_off_color) {
 
-  if (_led_port1) {
-    digitalWrite(_led_port1, LOW);
+    if (_flash_status) {
+      _clear_led();
+      delay(50);
+      _set_led(_led_color1);
+      delay(10);
+      _clear_led();
+    }
+
+    else {
+      _set_led(_led_color1);
+    }
+
+  }
+
+  // light off
+  else {
+    _clear_led();
   }
 }
 
