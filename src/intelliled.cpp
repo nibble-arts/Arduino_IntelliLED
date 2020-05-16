@@ -93,8 +93,17 @@ void INTELLILED::off(void) {
  */
 void INTELLILED::toggle(void) {
 
-  if (digitalRead(_led_port)) {
-    _off();
+  if (digitalRead(_led_port) || digitalRead(_led_port1()) {
+  
+	// blink with second colour
+	if (_led_color1) {
+		_set_led(_led_color1);
+	}
+	
+	// switch off
+	else {
+	    _off();
+	}
   }
   else {
     _on();
@@ -108,7 +117,14 @@ void INTELLILED::toggle(void) {
 
 void INTELLILED::color(int color) {
   _led_color = color;
+  _led_color1 = 0;
 }
+
+void INTELLILED::color(int color, int color1) {
+  _led_color = color;
+  _led_color1 = color1;
+}
+
 
 /*
  * update led: blink or flash
@@ -126,6 +142,14 @@ void INTELLILED::update(void) {
         _on();
         delay(10);
         _off();
+        
+        // flash with two colours
+        if (_led_color1) {
+        	delay (10);
+        	_set_led(_led_color1);
+	        delay (10);
+			_off();
+        }
       }
 
       // blink
@@ -134,7 +158,6 @@ void INTELLILED::update(void) {
       }
       _timeout = millis();
     }
-
   }
 }
 
@@ -148,6 +171,32 @@ void INTELLILED::_reset(void) {
   blink(0);
   _off();
 }
+
+
+/*
+ * set led with colour
+ */
+void _set_color(int color) {
+	
+	switch(color) {
+		
+        case INTELLILED_RED:
+          digitalWrite(_led_port, HIGH);
+          digitalWrite(_led_port1, LOW);
+          break;
+  
+        case INTELLILED_GREEN:
+          digitalWrite(_led_port, LOW);
+          digitalWrite(_led_port1, HIGH);
+          break;
+  
+       case INTELLILED_YELLOW:
+          digitalWrite(_led_port, HIGH);
+          digitalWrite(_led_port1, HIGH);
+          break;
+    }
+}
+
 
 /*
  * set led port[s] on
@@ -164,23 +213,7 @@ void INTELLILED::_on(void) {
 
     // multicolor INTELLILED
     if (_led_port1) {
-  
-      switch(_led_color) {
-        case INTELLILED_RED:
-          digitalWrite(_led_port, HIGH);
-          digitalWrite(_led_port1, LOW);
-          break;
-  
-        case INTELLILED_GREEN:
-          digitalWrite(_led_port, LOW);
-          digitalWrite(_led_port1, HIGH);
-          break;
-  
-       case INTELLILED_YELLOW:
-          digitalWrite(_led_port, HIGH);
-          digitalWrite(_led_port1, HIGH);
-          break;
-      }
+      _set_color(_led_color1);
     }
     else {
       digitalWrite(_led_port, HIGH);

@@ -39,6 +39,7 @@ class INTELLILED {
     void on(void);
     void off(void);
     void color(int color);
+    void color(int color, int color1);
     void toggle(void);
     void update(void);
 
@@ -46,11 +47,13 @@ class INTELLILED {
     int _led_port;
     int _led_port1;
     int _led_color;
+    int _led_color1;
     bool _inverted;
     double _timeout;
     int _blink_time;
     bool _flash_status;
 
+	void _set_led(int);
     void _on(void);
     void _off(void);
     void _flash_on(void);
