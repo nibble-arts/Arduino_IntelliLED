@@ -30,6 +30,8 @@ void INTELLILED::begin(int port, int port1) {
   _led_port1 = port1;
   _led_color = 0;
   _blink_time = 0;
+  _force_blink = 0;
+
   _timeout = millis();
 
   // set INTELLILED ports to OUTPUT
@@ -44,22 +46,20 @@ void INTELLILED::begin(int port, int port1) {
 
 
 /*
- * set invert
- * false: high = on
- * true: high = off
- */
-void INTELLILED::invert(bool inverted) {
-  _inverted = inverted;  
-}
-
-
-/*
  * set blink time in ms
  */
 void INTELLILED::blink(int blink_time) {
 
   _flash_off();
   _blink_time = blink_time;
+}
+
+
+/*
+ * force blink even if in on mode
+ */
+void INTELLILED::forceBlink(int force_blink) {
+  _force_blink = force_blink;
 }
 
 
@@ -77,52 +77,18 @@ void INTELLILED::flash(int blink_time) {
  * switch led on
  */
 void INTELLILED::on(void) {
-  _reset();
-  _on();
+
+  if (!_force_blink) {
+    _reset();
+    _on();
+  }
 }
 
 /*
  * switch led off
  */
 void INTELLILED::off(void) {
-  _reset();  
-}
-
-/*
- * toggle INTELLILED
- */
-void INTELLILED::toggle(void) {
-
-  if (digitalRead(_led_port) || digitalRead(_led_port1()) {
-  
-	// blink with second colour
-	if (_led_color1) {
-		_set_led(_led_color1);
-	}
-	
-	// switch off
-	else {
-	    _off();
-	}
-  }
-  else {
-    _on();
-  }
-}
-
-/*
- * set color for multicolor led
- * don't effect normal led
- */
-
-void INTELLILED::color(int color) {
-  _led_color = color;
-  _led_color1 = 0;
-}
-
-void INTELLILED::color(int color, int color1) {
-  _led_color = color;
-  _led_color1 = color1;
+  _reset();
 }
 
 
@@ -132,23 +98,28 @@ void INTELLILED::color(int color, int color1) {
  */
 void INTELLILED::update(void) {
 
+  // if (_blink_time != 0 || _force_blink != 0) {
   if (_blink_time != 0) {
 
+
     // timeout > change status
+    // if ((millis() > (_timeout + (int)_blink_time))
+      // || (_blink_time != 0 && (millis() > (_timeout + (int)_force_blink)))) {
+
     if (millis() > (_timeout + (int)_blink_time)) {
 
       // flash
       if (_flash_status == true) {
         _on();
-        delay(10);
+        delay(5);
         _off();
-        
-        // flash with two colours
-        if (_led_color1) {
-        	delay (10);
+
+        // flash with second colour
+        if (_off_color) {
+        	delay (50);
         	_set_led(_led_color1);
-	        delay (10);
-			_off();
+	        delay (5);
+			    _off();
         }
       }
 
@@ -156,12 +127,69 @@ void INTELLILED::update(void) {
       else {
         toggle();
       }
+
       _timeout = millis();
     }
   }
 }
 
 
+/*
+ * toggle INTELLILED
+ */
+void INTELLILED::toggle(void) {
+
+  if (_is_on) {
+  
+  	// blink with second colour
+  	if (_off_color) {
+
+   		_set_led(_led_color1);
+
+      // off color == color => blink one time
+      if (_led_color == _led_color1) {
+
+        delay(10);
+        _off();
+        delay(50);
+        _set_led(_led_color1);
+      }
+
+  	}
+  	
+  	// switch off
+  	else {
+  	    _off();
+  	}
+
+    _is_on = false;
+  }
+
+  else {
+    _on();
+  }
+}
+
+
+/*
+ * set color for multicolor led
+ * don't effect normal led
+ */
+
+void INTELLILED::color(int color) {
+  _led_color = color;
+  _off_color = false;
+}
+
+void INTELLILED::color(int color, int color1) {
+  _led_color = color;
+  offColor(color1);
+}
+
+void INTELLILED::offColor(int color) {
+  _led_color1 = color;
+  _off_color = true;
+}
 
 
 /*
@@ -169,6 +197,7 @@ void INTELLILED::update(void) {
  */
 void INTELLILED::_reset(void) {
   blink(0);
+  _off_color = false;
   _off();
 }
 
@@ -176,8 +205,11 @@ void INTELLILED::_reset(void) {
 /*
  * set led with colour
  */
-void _set_color(int color) {
-	
+void INTELLILED::_set_led(int color) {
+
+Serial.print("color: ");
+Serial.println(color);
+
 	switch(color) {
 		
         case INTELLILED_RED:
@@ -203,21 +235,14 @@ void _set_color(int color) {
  */
 void INTELLILED::_on(void) {
 
-  // set led inverted
-  if (_inverted) {
-      digitalWrite(_led_port, LOW);
+  _is_on = true;
+
+  // multicolor INTELLILED
+  if (_led_port1) {
+    _set_led(_led_color);
   }
-
-  // set color led high = on
   else {
-
-    // multicolor INTELLILED
-    if (_led_port1) {
-      _set_color(_led_color1);
-    }
-    else {
-      digitalWrite(_led_port, HIGH);
-    }
+    digitalWrite(_led_port, HIGH);
   }
 }
 
@@ -227,19 +252,12 @@ void INTELLILED::_on(void) {
  */
 void INTELLILED::_off(void) {
 
-  // set led inverted
-  if (_inverted) {
-    digitalWrite(_led_port, HIGH);
-  }
+  _is_on = false;
 
-  // leds off
-  else {
-    
-    digitalWrite(_led_port, LOW);
-  
-    if (_led_port1) {
-      digitalWrite(_led_port1, LOW);
-    }
+  digitalWrite(_led_port, LOW);
+
+  if (_led_port1) {
+    digitalWrite(_led_port1, LOW);
   }
 }
 

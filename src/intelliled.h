@@ -34,24 +34,30 @@ class INTELLILED {
     INTELLILED(int port, int port1=false);
     void begin(int port, int port1=false);
     void blink(int blink_time);
+    void forceBlink(int);
     void flash(int blink_time);
-    void invert(bool inverted);
     void on(void);
     void off(void);
     void color(int color);
     void color(int color, int color1);
+    void offColor(int color);
     void toggle(void);
     void update(void);
 
   private:
+    bool _is_on;
+    int _force_blink;
+    bool _flash_status;
+
     int _led_port;
     int _led_port1;
+    
     int _led_color;
     int _led_color1;
-    bool _inverted;
+    bool _off_color;
+    
     double _timeout;
     int _blink_time;
-    bool _flash_status;
 
 	void _set_led(int);
     void _on(void);
